@@ -26,8 +26,14 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [user, setUser] = useState<User | null>(null);
 
   const login = (email: string, password: string) => {
-    if (email === "demo@farmai.com" && password === "123456") {
-      setUser({ email, firstName: "Demo", lastName: "Farmer", phone: "+91 9876543210" });
+    const cleanEmail = email.trim().toLowerCase();
+    const cleanPass = password.trim();
+    if ((cleanEmail === "demo@farmai.com" || cleanEmail.includes("demo") || cleanEmail === "+91 9876543210" || cleanEmail === "9876543210") && (cleanPass === "123456" || cleanPass.length >= 4)) {
+      setUser({ email: "demo@farmai.com", firstName: "Demo", lastName: "Farmer", phone: "+91 9876543210" });
+      return true;
+    }
+    if (cleanEmail && cleanPass) {
+      setUser({ email: cleanEmail, firstName: cleanEmail.split("@")[0] || "Farmer", lastName: "", phone: "" });
       return true;
     }
     return false;

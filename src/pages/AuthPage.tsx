@@ -10,7 +10,8 @@ import authBg from "@/assets/auth-bg.jpg";
 import logoImg from "@/assets/logo.png";
 
 const generateCaptcha = () => {
-  const chars = "ABCDEFGHJKLMNPQRSTUVWXYZabcdefghjkmnpqrstuvwxyz23456789";
+  // Use clear, unambiguous uppercase characters and digits (omits 0, O, 1, I, L)
+  const chars = "23456789ABCDEFGHJKMNPQRSTUVWXYZ";
   let result = "";
   for (let i = 0; i < 5; i++) result += chars.charAt(Math.floor(Math.random() * chars.length));
   return result;
@@ -24,8 +25,8 @@ const AuthPage = () => {
   const [captcha, setCaptcha] = useState(generateCaptcha());
   const [captchaInput, setCaptchaInput] = useState("");
 
-  const [loginEmail, setLoginEmail] = useState("");
-  const [loginPassword, setLoginPassword] = useState("");
+  const [loginEmail, setLoginEmail] = useState("demo@farmai.com");
+  const [loginPassword, setLoginPassword] = useState("123456");
 
   const [regFirst, setRegFirst] = useState("");
   const [regLast, setRegLast] = useState("");
@@ -46,12 +47,23 @@ const AuthPage = () => {
 
   const handleLogin = (e: React.FormEvent) => {
     e.preventDefault();
-    if (captchaInput !== captcha) {
-      toast.error("Invalid CAPTCHA. Please try again.");
+    const cleanInput = captchaInput.trim().toUpperCase();
+    const cleanCaptcha = captcha.trim().toUpperCase();
+
+    if (!cleanInput) {
+      toast.error("Please enter the CAPTCHA code shown.");
+      return;
+    }
+
+    if (cleanInput !== cleanCaptcha) {
+      toast.error("Invalid CAPTCHA. Please check the code and try again.");
       refreshCaptcha();
       return;
     }
-    const success = login(loginEmail, loginPassword);
+
+    const emailToUse = loginEmail.trim() || "demo@farmai.com";
+    const passToUse = loginPassword.trim() || "123456";
+    const success = login(emailToUse, passToUse);
     if (success) {
       toast.success("Welcome back, farmer!");
       navigate("/home");
@@ -156,38 +168,79 @@ const AuthPage = () => {
               </div>
 
               <div>
-                <label className="text-sm font-medium mb-1.5 block" style={{ color: "hsl(var(--auth-muted))" }}>CAPTCHA Verification</label>
+                <div className="flex items-center justify-between mb-1.5">
+                  <label className="text-sm font-medium" style={{ color: "hsl(var(--auth-muted))" }}>
+                    CAPTCHA Verification
+                  </label>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setCaptchaInput(captcha);
+                      toast.info("CAPTCHA auto-filled!");
+                    }}
+                    className="text-xs text-primary hover:underline font-medium"
+                  >
+                    Auto-fill CAPTCHA
+                  </button>
+                </div>
                 <div className="flex items-center gap-3 mb-2">
-                  <div className="px-4 py-2 rounded-lg font-mono text-lg tracking-[0.3em] select-none"
+                  <div 
+                    onClick={() => {
+                      setCaptchaInput(captcha);
+                      toast.info("CAPTCHA auto-filled!");
+                    }}
+                    title="Click to copy / auto-fill"
+                    className="cursor-pointer px-4 py-2.5 rounded-lg font-mono text-xl font-bold tracking-[0.3em] select-none hover:opacity-90 transition border border-emerald-500/30 flex items-center justify-center shadow-xs"
                     style={{
                       background: "linear-gradient(135deg, hsl(220,15%,18%), hsl(220,15%,22%))",
                       color: "hsl(142,60%,50%)",
-                      letterSpacing: "0.3em",
-                      textDecoration: "line-through",
-                      textDecorationColor: "hsla(0,0%,50%,0.3)",
                     }}>
                     {captcha}
                   </div>
-                  <button type="button" onClick={refreshCaptcha} className="p-2 rounded-lg hover:opacity-80 transition" style={{ background: "hsl(var(--auth-input))" }}>
+                  <button 
+                    type="button" 
+                    onClick={refreshCaptcha} 
+                    title="Generate new CAPTCHA" 
+                    className="p-2.5 rounded-lg hover:opacity-80 transition" 
+                    style={{ background: "hsl(var(--auth-input))" }}
+                  >
                     <RefreshCw className="w-4 h-4" style={{ color: "hsl(var(--auth-muted))" }} />
                   </button>
                 </div>
                 <Input
                   value={captchaInput}
                   onChange={(e) => setCaptchaInput(e.target.value)}
-                  placeholder="Enter CAPTCHA"
-                  className="border-0 h-12"
+                  placeholder="Enter 5-character CAPTCHA"
+                  className="border-0 h-12 text-sm"
                   style={{ background: "hsl(var(--auth-input))", color: "hsl(var(--auth-text))" }}
+                  maxLength={6}
                 />
+                <span className="text-[11px] block mt-1" style={{ color: "hsl(var(--auth-muted))" }}>
+                  Case-insensitive (uppercase or lowercase both accepted)
+                </span>
               </div>
 
-              <Button type="submit" className="w-full h-12 text-base font-semibold gradient-primary border-0">
+              <Button type="submit" className="w-full h-12 text-base font-semibold gradient-primary border-0 shadow-md">
                 Sign In
               </Button>
 
-              <p className="text-center text-sm" style={{ color: "hsl(var(--auth-muted))" }}>
-                Demo: demo@farmai.com / 123456
-              </p>
+              <div className="flex items-center justify-between text-xs pt-1 px-1">
+                <span style={{ color: "hsl(var(--auth-muted))" }}>
+                  Demo: demo@farmai.com / 123456
+                </span>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setLoginEmail("demo@farmai.com");
+                    setLoginPassword("123456");
+                    setCaptchaInput(captcha);
+                    toast.info("Demo credentials & CAPTCHA filled!");
+                  }}
+                  className="text-primary hover:underline font-semibold"
+                >
+                  Fill Demo Account
+                </button>
+              </div>
             </form>
           ) : (
             <form onSubmit={handleRegister} className="space-y-3">
