@@ -1,0 +1,211 @@
+@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Space+Grotesk:wght@400;500;600;700&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --background: 140 20% 97%;
+    --foreground: 150 30% 10%;
+    --card: 0 0% 100%;
+    --card-foreground: 150 30% 10%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 150 30% 10%;
+    --primary: 142 60% 40%;
+    --primary-foreground: 0 0% 100%;
+    --secondary: 80 40% 92%;
+    --secondary-foreground: 150 30% 15%;
+    --muted: 140 15% 93%;
+    --muted-foreground: 150 10% 45%;
+    --accent: 45 90% 55%;
+    --accent-foreground: 30 60% 15%;
+    --destructive: 0 72% 51%;
+    --destructive-foreground: 0 0% 100%;
+    --border: 140 15% 88%;
+    --input: 140 15% 88%;
+    --ring: 142 60% 40%;
+    --radius: 0.75rem;
+
+    --sidebar-background: 0 0% 98%;
+    --sidebar-foreground: 240 5.3% 26.1%;
+    --sidebar-primary: 240 5.9% 10%;
+    --sidebar-primary-foreground: 0 0% 98%;
+    --sidebar-accent: 240 4.8% 95.9%;
+    --sidebar-accent-foreground: 240 5.9% 10%;
+    --sidebar-border: 220 13% 91%;
+    --sidebar-ring: 217.2 91.2% 59.8%;
+
+    /* Custom tokens */
+    --earth: 30 50% 35%;
+    --earth-foreground: 30 20% 95%;
+    --sky: 200 70% 50%;
+    --sky-foreground: 0 0% 100%;
+    --leaf: 120 45% 45%;
+    --leaf-light: 120 40% 92%;
+    --warning: 38 92% 50%;
+    --warning-foreground: 30 60% 15%;
+
+    /* Auth dark theme */
+    --auth-bg: 220 20% 10%;
+    --auth-card: 220 18% 14%;
+    --auth-input: 220 15% 20%;
+    --auth-border: 220 12% 25%;
+    --auth-text: 0 0% 92%;
+    --auth-muted: 220 10% 55%;
+
+    font-family: 'Plus Jakarta Sans', sans-serif;
+  }
+
+  .dark {
+    --background: 150 20% 6%;
+    --foreground: 140 15% 93%;
+    --card: 150 18% 9%;
+    --card-foreground: 140 15% 93%;
+    --popover: 150 18% 9%;
+    --popover-foreground: 140 15% 93%;
+    --primary: 142 55% 45%;
+    --primary-foreground: 0 0% 100%;
+    --secondary: 150 15% 15%;
+    --secondary-foreground: 140 15% 93%;
+    --muted: 150 12% 15%;
+    --muted-foreground: 140 10% 55%;
+    --accent: 45 85% 50%;
+    --accent-foreground: 30 60% 10%;
+    --destructive: 0 62.8% 30.6%;
+    --destructive-foreground: 0 0% 100%;
+    --border: 150 12% 20%;
+    --input: 150 12% 20%;
+    --ring: 142 55% 45%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply bg-background text-foreground antialiased;
+  }
+
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
+    font-family: 'Space Grotesk', sans-serif;
+  }
+}
+
+@layer components {
+  .glass-card {
+    @apply bg-card/80 backdrop-blur-lg border border-border/50 shadow-lg;
+  }
+
+  .gradient-primary {
+    background: linear-gradient(135deg, hsl(142, 60%, 40%), hsl(120, 45%, 45%));
+  }
+
+  .gradient-accent {
+    background: linear-gradient(135deg, hsl(45, 90%, 55%), hsl(38, 92%, 50%));
+  }
+
+  .gradient-earth {
+    background: linear-gradient(135deg, hsl(30, 50%, 35%), hsl(20, 45%, 30%));
+  }
+
+  .auth-glass {
+    background: hsl(var(--auth-card));
+    border: 1px solid hsl(var(--auth-border));
+  }
+
+  .bottom-nav-safe {
+    padding-bottom: calc(env(safe-area-inset-bottom, 0px) + 4.5rem);
+  }
+}
+
+@layer utilities {
+  .text-gradient-primary {
+    @apply bg-clip-text text-transparent;
+    background-image: linear-gradient(135deg, hsl(142, 60%, 40%), hsl(80, 50%, 45%));
+  }
+}
+
+
+@keyframes introFadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes introSlideUp {
+  from {
+    opacity: 0;
+    transform: translateY(60px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes introPulse {
+
+  0%,
+  100% {
+    transform: scale(1);
+    opacity: 0.7;
+  }
+
+  50% {
+    transform: scale(1.1);
+    opacity: 1;
+  }
+}
+
+@keyframes progressBar {
+  from {
+    width: 0%;
+  }
+
+  to {
+    width: 100%;
+  }
+}
+
+.animate-intro-fade {
+  animation: introFadeIn 1s ease-out forwards;
+}
+
+.animate-intro-slide {
+  animation: introSlideUp 0.8s ease-out forwards;
+}
+
+.animate-intro-pulse {
+  animation: introPulse 2s ease-in-out infinite;
+}
+
+.animate-progress {
+  animation: progressBar 6s linear forwards;
+}
+
+/* Hide number input spin buttons */
+input::-webkit-outer-spin-button,
+input::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+input[type=number] {
+  -moz-appearance: textfield;
+  appearance: textfield;
+}
