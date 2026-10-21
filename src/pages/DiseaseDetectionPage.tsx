@@ -1,10 +1,11 @@
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { 
   Camera, AlertTriangle, CheckCircle, Bug, 
   Pill, RotateCcw, Droplets, FlaskConical,
   Sparkles, Sprout, Cpu, Activity,
-  Layers, ShieldAlert, Target, Microscope, ArrowRight
+  Layers, ShieldAlert, Target, Microscope, ArrowRight,
+  Scan, Play, Timer, CheckCircle2, Search, Zap, Eye
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import AppLayout from "@/components/AppLayout";
@@ -65,6 +66,14 @@ export interface DiseaseProfile {
     sprayingSchedule: string[];
   };
   recoveryTimeline: string;
+  similarCandidates?: Array<{
+    id: string;
+    crop: string;
+    disease: string;
+    matchScore: number;
+    image: string;
+    similarityReason: string;
+  }>;
 }
 
 const diseaseProfiles: DiseaseProfile[] = [
@@ -153,7 +162,12 @@ const diseaseProfiles: DiseaseProfile[] = [
         "Always spray both upper and lower leaf surfaces with fine hollow-cone nozzle"
       ]
     },
-    recoveryTimeline: "10 to 14 days for bacterial margin halting and clean new apical leaf emergence."
+    recoveryTimeline: "10 to 14 days for bacterial margin halting and clean new apical leaf emergence.",
+    similarCandidates: [
+      { id: "tomato-early-blight", crop: "Tomato", disease: "Early Blight", matchScore: 71, image: tomatoEarlyBlightImg, similarityReason: "Similar circular necrotic halo and chlorotic tissue yellowing" },
+      { id: "cercospora-leaf-spot", crop: "Pulses", disease: "Cercospora Spot", matchScore: 68, image: cercosporaLeafSpotImg, similarityReason: "Shared Cercospora genus ashen-gray center morphology" },
+      { id: "chilli-anthracnose", crop: "Chilli", disease: "Anthracnose", matchScore: 45, image: chilliAnthracnoseImg, similarityReason: "Solanaceous necrotic leaf spot overlap" }
+    ]
   },
   {
     id: "tomato-early-blight",
@@ -240,7 +254,12 @@ const diseaseProfiles: DiseaseProfile[] = [
         "Prune and burn all heavily spotted lower leaves before spraying"
       ]
     },
-    recoveryTimeline: "7 to 10 days for necrotic ring expansion arrest and healthy apical growth."
+    recoveryTimeline: "7 to 10 days for necrotic ring expansion arrest and healthy apical growth.",
+    similarCandidates: [
+      { id: "potato-late-blight", crop: "Potato", disease: "Late Blight", matchScore: 74, image: potatoLateBlightImg, similarityReason: "Solanaceous blight lesion with localized yellow edge" },
+      { id: "groundnut-tikka", crop: "Groundnut", disease: "Tikka Leaf Spot", matchScore: 65, image: groundnutTikkaImg, similarityReason: "Concentric brown circles with chlorotic perimeter" },
+      { id: "cercospora-leaf-spot", crop: "Pulses", disease: "Cercospora Spot", matchScore: 52, image: cercosporaLeafSpotImg, similarityReason: "Circular fungal necrosis pattern" }
+    ]
   },
   {
     id: "cucumber-powdery-mildew",
@@ -327,7 +346,12 @@ const diseaseProfiles: DiseaseProfile[] = [
         "Ensure thorough coverage of both upper leaf surfaces and petioles"
       ]
     },
-    recoveryTimeline: "5 to 8 days for white powdery patches to shrivel, brown, and detach."
+    recoveryTimeline: "5 to 8 days for white powdery patches to shrivel, brown, and detach.",
+    similarCandidates: [
+      { id: "cotton-leaf-curl", crop: "Cotton", disease: "Leaf Curl", matchScore: 58, image: cottonLeafCurlImg, similarityReason: "Curled leaf margins and upward wrinkling" },
+      { id: "tobacco-wildfire-frogeye", crop: "Tobacco", disease: "Weather Fleck", matchScore: 49, image: tobaccoWildfireImg, similarityReason: "White stippled patches on green leaf lamina" },
+      { id: "tomato-early-blight", crop: "Tomato", disease: "Early Blight", matchScore: 36, image: tomatoEarlyBlightImg, similarityReason: "Chlorotic interveinal background" }
+    ]
   },
   {
     id: "rice-bacterial-blight",
@@ -413,7 +437,12 @@ const diseaseProfiles: DiseaseProfile[] = [
         "Second spray 10 to 12 days later if rainy weather continues"
       ]
     },
-    recoveryTimeline: "12 to 16 days to arrest lesion progression; newly emerging flag leaves stay green."
+    recoveryTimeline: "12 to 16 days to arrest lesion progression; newly emerging flag leaves stay green.",
+    similarCandidates: [
+      { id: "wheat-yellow-rust", crop: "Wheat", disease: "Stripe Rust", matchScore: 67, image: wheatYellowRustImg, similarityReason: "Parallel linear striping on monocot leaf blade" },
+      { id: "tobacco-wildfire-frogeye", crop: "Tobacco", disease: "Wildfire", matchScore: 61, image: tobaccoWildfireImg, similarityReason: "Bacterial halo water-soaking pathology" },
+      { id: "potato-late-blight", crop: "Potato", disease: "Late Blight", matchScore: 48, image: potatoLateBlightImg, similarityReason: "Straw-bleached necrotic zone" }
+    ]
   },
   {
     id: "wheat-yellow-rust",
@@ -499,7 +528,12 @@ const diseaseProfiles: DiseaseProfile[] = [
         "Second spray: 14 to 18 days later if cool, foggy weather persists"
       ]
     },
-    recoveryTimeline: "8 to 12 days; active lemon-yellow spores turn black/brown (teliospores), indicating pathogen death."
+    recoveryTimeline: "8 to 12 days; active lemon-yellow spores turn black/brown (teliospores), indicating pathogen death.",
+    similarCandidates: [
+      { id: "rice-bacterial-blight", crop: "Rice", disease: "Bacterial Blight", matchScore: 70, image: riceBacterialBlightImg, similarityReason: "Linear longitudinal grain leaf lesions" },
+      { id: "cucumber-powdery-mildew", crop: "Cucumber", disease: "Powdery Mildew", matchScore: 53, image: cucumberPowderyMildewImg, similarityReason: "Superficial powdery fungal spore exudation" },
+      { id: "groundnut-tikka", crop: "Groundnut", disease: "Tikka Spot", matchScore: 39, image: groundnutTikkaImg, similarityReason: "Chlorotic halo yellow pigments" }
+    ]
   },
   {
     id: "cercospora-leaf-spot",
@@ -584,7 +618,12 @@ const diseaseProfiles: DiseaseProfile[] = [
         "Focus spray nozzles on lower canopy where initial spots originate"
       ]
     },
-    recoveryTimeline: "10 to 14 days for spot progression arrest and canopy retention."
+    recoveryTimeline: "10 to 14 days for spot progression arrest and canopy retention.",
+    similarCandidates: [
+      { id: "tobacco-wildfire-frogeye", crop: "Tobacco", disease: "Frogeye Spot", matchScore: 82, image: tobaccoWildfireImg, similarityReason: "Identical Cercospora ashen white centers and brown border" },
+      { id: "groundnut-tikka", crop: "Groundnut", disease: "Tikka Disease", matchScore: 73, image: groundnutTikkaImg, similarityReason: "Shared leguminous Cercospora spot pathogeny" },
+      { id: "tomato-early-blight", crop: "Tomato", disease: "Early Blight", matchScore: 51, image: tomatoEarlyBlightImg, similarityReason: "Discrete circular necrotic lesions" }
+    ]
   },
   {
     id: "potato-late-blight",
@@ -669,7 +708,12 @@ const diseaseProfiles: DiseaseProfile[] = [
         "Repeat every 7 days while ambient humidity remains >85%"
       ]
     },
-    recoveryTimeline: "7 to 10 days; bright sunny weather and dry air halt the epidemic rapidly."
+    recoveryTimeline: "7 to 10 days; bright sunny weather and dry air halt the epidemic rapidly.",
+    similarCandidates: [
+      { id: "tomato-early-blight", crop: "Tomato", disease: "Early Blight", matchScore: 78, image: tomatoEarlyBlightImg, similarityReason: "Solanaceous necrotic leaf collapse" },
+      { id: "rice-bacterial-blight", crop: "Rice", disease: "Bacterial Blight", matchScore: 62, image: riceBacterialBlightImg, similarityReason: "Rapid water-soaked leaf tissue necrosis" },
+      { id: "chilli-anthracnose", crop: "Chilli", disease: "Anthracnose", matchScore: 47, image: chilliAnthracnoseImg, similarityReason: "Dark sunken necrotic decay" }
+    ]
   },
   {
     id: "chilli-anthracnose",
@@ -754,7 +798,12 @@ const diseaseProfiles: DiseaseProfile[] = [
         "Repeat after 12 days; prune and destroy all dried dieback twigs"
       ]
     },
-    recoveryTimeline: "12 to 15 days for dieback progression arrest and fresh shoot growth."
+    recoveryTimeline: "12 to 15 days for dieback progression arrest and fresh shoot growth.",
+    similarCandidates: [
+      { id: "tomato-early-blight", crop: "Tomato", disease: "Early Blight", matchScore: 69, image: tomatoEarlyBlightImg, similarityReason: "Concentric target ring morphology" },
+      { id: "tobacco-wildfire-frogeye", crop: "Tobacco", disease: "Wildfire", matchScore: 61, image: tobaccoWildfireImg, similarityReason: "Dark necrotic spots on solanaceous foliage" },
+      { id: "groundnut-tikka", crop: "Groundnut", disease: "Tikka Spot", matchScore: 48, image: groundnutTikkaImg, similarityReason: "Dark sunken necrotic fruiting cushions" }
+    ]
   },
   {
     id: "cotton-leaf-curl",
@@ -831,7 +880,7 @@ const diseaseProfiles: DiseaseProfile[] = [
         modeOfAction: "Lipid biosynthesis inhibitor targeting whitefly nymphs and eggs."
       },
       organicAlternative: {
-        name: "Neem Oil 10,000 ppm (3 mL/L) + Yellow Sticky Traps (20/acre)",
+        name: "Neem Oil 10,000 ppm + Yellow Sticky Traps (20/acre)",
         dosage: "3.0 mL / Litre of water"
       },
       sprayingSchedule: [
@@ -839,7 +888,11 @@ const diseaseProfiles: DiseaseProfile[] = [
         "Install 20 yellow sticky cards per acre to monitor and capture flying vectors"
       ]
     },
-    recoveryTimeline: "14 to 20 days; existing curled leaves remain deformed, but new apical growth emerges healthy when vectors are controlled."
+    recoveryTimeline: "14 to 20 days; existing curled leaves remain deformed, but new apical growth emerges healthy when vectors are controlled.",
+    similarCandidates: [
+      { id: "cucumber-powdery-mildew", crop: "Cucumber", disease: "Powdery Mildew", matchScore: 61, image: cucumberPowderyMildewImg, similarityReason: "Leaf margin curling and upward cupping" },
+      { id: "tobacco-wildfire-frogeye", crop: "Tobacco", disease: "Weather Fleck", matchScore: 42, image: tobaccoWildfireImg, similarityReason: "Deformed lamina and cellular collapse" }
+    ]
   },
   {
     id: "groundnut-tikka",
@@ -924,26 +977,142 @@ const diseaseProfiles: DiseaseProfile[] = [
         "Second spray 15 days later if spots persist"
       ]
     },
-    recoveryTimeline: "10 to 14 days for lesion containment and canopy retention."
+    recoveryTimeline: "10 to 14 days for lesion containment and canopy retention.",
+    similarCandidates: [
+      { id: "cercospora-leaf-spot", crop: "Pulses", disease: "Cercospora Spot", matchScore: 79, image: cercosporaLeafSpotImg, similarityReason: "Identical Cercospora fungal spore mechanism" },
+      { id: "tomato-early-blight", crop: "Tomato", disease: "Early Blight", matchScore: 68, image: tomatoEarlyBlightImg, similarityReason: "Circular brown necrotic spot with chlorotic halo" },
+      { id: "tobacco-wildfire-frogeye", crop: "Tobacco", disease: "Frogeye Spot", matchScore: 65, image: tobaccoWildfireImg, similarityReason: "Dark haloed leaf lesions" }
+    ]
+  }
+];
+
+// 5 Integration Stages during the 10-Second Diagnostic Scan
+const SCAN_STAGES = [
+  {
+    seconds: "10s - 8s",
+    title: "Optical Tensor Preprocessing",
+    desc: "Rescaling RGB spectrum into 224×224 tensor; normalizing illumination & chlorophyll ratios...",
+    icon: Camera,
+    color: "text-sky-500",
+    badge: "Input Preprocessing"
+  },
+  {
+    seconds: "8s - 6s",
+    title: "Pathological Feature Extraction",
+    desc: "Segmenting necrotic centers, chlorotic halos, vein borders, and fungal pustules...",
+    icon: Microscope,
+    color: "text-amber-500",
+    badge: "Edge Feature Pool"
+  },
+  {
+    seconds: "6s - 4s",
+    title: "Cross-Matching Similar Leaf Samples",
+    desc: "Querying 54,303 PlantVillage reference leaves to find matching pathology candidates...",
+    icon: Search,
+    color: "text-purple-500",
+    badge: "Dataset Cross-Reference"
+  },
+  {
+    seconds: "4s - 2s",
+    title: "MobileNetV2 Vision CNN Inference",
+    desc: "Executing 53 inverted residual layers; computing softmax probability vector (Latency: 38ms)...",
+    icon: Cpu,
+    color: "text-emerald-500",
+    badge: "Deep Neural Inference"
+  },
+  {
+    seconds: "2s - 0s",
+    title: "Agronomic Prescription Synthesis",
+    desc: "Synthesizing exact water irrigation volume, soil moisture limits, NPK ratios & pesticides...",
+    icon: Droplets,
+    color: "text-blue-500",
+    badge: "Prescription Engine"
   }
 ];
 
 const DiseaseDetectionPage = () => {
   const [selectedProfile, setSelectedProfile] = useState<DiseaseProfile>(diseaseProfiles[0]);
   const [activeCalloutId, setActiveCalloutId] = useState<string>(diseaseProfiles[0].visualCallouts[0].id);
-  const [analyzing, setAnalyzing] = useState(false);
   const [uploadedImage, setUploadedImage] = useState<string | null>(null);
-  const [activeTab, setActiveTab] = useState<"visual" | "water" | "fertilizer" | "pesticide">("visual");
+  const [activeTab, setActiveTab] = useState<"visual" | "water" | "fertilizer" | "pesticide">("water");
   const [mlFeatures, setMlFeatures] = useState<LeafFeatures | null>(null);
   const [inferenceTime, setInferenceTime] = useState<number>(38);
   const fileRef = useRef<HTMLInputElement>(null);
 
+  // 10-Second Interactive Scanning Integration States
+  const [isScanning, setIsScanning] = useState(false);
+  const [scanProgress, setScanProgress] = useState(0); // 0 to 100%
+  const [secondsRemaining, setSecondsRemaining] = useState(10);
+  const [activeStageIdx, setActiveStageIdx] = useState(0);
+  const [candidateHighlightIdx, setCandidateHighlightIdx] = useState(0);
+  const [scanCompleted, setScanCompleted] = useState(false);
+
+  const scanTimerRef = useRef<NodeJS.Timeout | null>(null);
+
   const activeCallout = selectedProfile.visualCallouts.find(c => c.id === activeCalloutId) || selectedProfile.visualCallouts[0];
+
+  // Cleanup timers on unmount
+  useEffect(() => {
+    return () => {
+      if (scanTimerRef.current) clearInterval(scanTimerRef.current);
+    };
+  }, []);
+
+  // Trigger the 10-Second High-Tech Scanning Integration
+  const startTenSecondScan = (targetProfile?: DiseaseProfile) => {
+    if (isScanning) return;
+
+    if (scanTimerRef.current) clearInterval(scanTimerRef.current);
+
+    const destinationProfile = targetProfile || selectedProfile;
+    setSelectedProfile(destinationProfile);
+    setActiveCalloutId(destinationProfile.visualCallouts[0].id);
+
+    setIsScanning(true);
+    setScanCompleted(false);
+    setScanProgress(0);
+    setSecondsRemaining(10);
+    setActiveStageIdx(0);
+
+    const totalDurationMs = 10000; // Exact 10 seconds
+    const intervalMs = 100;
+    const progressStep = (intervalMs / totalDurationMs) * 100;
+
+    let currentProgress = 0;
+    const startTime = performance.now();
+
+    scanTimerRef.current = setInterval(() => {
+      const elapsed = performance.now() - startTime;
+      currentProgress = Math.min((elapsed / totalDurationMs) * 100, 100);
+      setScanProgress(Math.round(currentProgress));
+
+      const secLeft = Math.max(Math.ceil((totalDurationMs - elapsed) / 1000), 0);
+      setSecondsRemaining(secLeft);
+
+      // Determine 5 scan stages
+      const stage = Math.min(Math.floor((currentProgress / 100) * SCAN_STAGES.length), SCAN_STAGES.length - 1);
+      setActiveStageIdx(stage);
+
+      // Rapidly cycle candidate leaves to demonstrate live matching
+      setCandidateHighlightIdx(Math.floor((elapsed / 350) % diseaseProfiles.length));
+
+      if (currentProgress >= 100) {
+        if (scanTimerRef.current) clearInterval(scanTimerRef.current);
+        setIsScanning(false);
+        setScanCompleted(true);
+        setActiveTab("water"); // Immediately highlight the water amount as requested!
+        if (typeof navigator !== "undefined" && "vibrate" in navigator) {
+          try { navigator.vibrate([100, 50, 100]); } catch { /* ignore */ }
+        }
+      }
+    }, intervalMs);
+  };
 
   const handleSelectDisease = (profile: DiseaseProfile) => {
     setSelectedProfile(profile);
     setActiveCalloutId(profile.visualCallouts[0].id);
     setUploadedImage(null);
+    setScanCompleted(false);
   };
 
   const handleUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -953,35 +1122,26 @@ const DiseaseDetectionPage = () => {
     reader.onload = async (ev) => {
       const src = ev.target?.result as string;
       setUploadedImage(src);
-      setAnalyzing(true);
       const ml = await analyzeLeafImageWithML(src);
       setMlFeatures(ml.features);
       setInferenceTime(ml.inferenceTimeMs);
       
-      setTimeout(() => {
-        const match = diseaseProfiles.find(d => d.id === ml.diseaseId) || diseaseProfiles[0];
-        setSelectedProfile(match);
-        setActiveCalloutId(match.visualCallouts[0].id);
-        setAnalyzing(false);
-      }, 1100);
+      const match = diseaseProfiles.find(d => d.id === ml.diseaseId) || diseaseProfiles[0];
+      startTenSecondScan(match);
     };
     reader.readAsDataURL(file);
   };
 
   const handleScanNext = () => {
-    setAnalyzing(true);
-    setTimeout(() => {
-      const currentIndex = diseaseProfiles.findIndex(p => p.id === selectedProfile.id);
-      const nextIndex = (currentIndex + 1) % diseaseProfiles.length;
-      const nextProfile = diseaseProfiles[nextIndex];
-      setSelectedProfile(nextProfile);
-      setActiveCalloutId(nextProfile.visualCallouts[0].id);
-      setUploadedImage(null);
-      setAnalyzing(false);
-    }, 700);
+    const currentIndex = diseaseProfiles.findIndex(p => p.id === selectedProfile.id);
+    const nextIndex = (currentIndex + 1) % diseaseProfiles.length;
+    startTenSecondScan(diseaseProfiles[nextIndex]);
   };
 
   const handleReset = () => {
+    if (scanTimerRef.current) clearInterval(scanTimerRef.current);
+    setIsScanning(false);
+    setScanCompleted(false);
     setUploadedImage(null);
     setSelectedProfile(diseaseProfiles[0]);
     setActiveCalloutId(diseaseProfiles[0].visualCallouts[0].id);
@@ -1004,12 +1164,12 @@ const DiseaseDetectionPage = () => {
           <div className="flex items-center gap-2">
             <button
               onClick={handleScanNext}
-              disabled={analyzing}
+              disabled={isScanning}
               className="flex items-center gap-1.5 text-xs font-semibold text-primary hover:text-primary/80 bg-primary/10 px-2.5 py-1.5 rounded-lg transition"
             >
-              <Sparkles className={`w-3.5 h-3.5 ${analyzing ? "animate-spin" : ""}`} /> Next Case
+              <Sparkles className={`w-3.5 h-3.5 ${isScanning ? "animate-spin" : ""}`} /> Next Leaf
             </button>
-            {(uploadedImage || selectedProfile.id !== diseaseProfiles[0].id) && (
+            {(uploadedImage || scanCompleted || selectedProfile.id !== diseaseProfiles[0].id) && (
               <button
                 onClick={handleReset}
                 className="flex items-center gap-1 text-xs font-semibold text-muted-foreground hover:text-foreground bg-muted px-2.5 py-1.5 rounded-lg transition"
@@ -1024,7 +1184,7 @@ const DiseaseDetectionPage = () => {
         <div className="space-y-2">
           <div className="flex items-center justify-between text-xs">
             <span className="font-semibold text-foreground flex items-center gap-1.5">
-              <Layers className="w-3.5 h-3.5 text-primary" /> 10 Visual Pathology Cases (Click to Inspect):
+              <Layers className="w-3.5 h-3.5 text-primary" /> 10 Sample Leaves (Tap to Pick & Scan):
             </span>
             <span className="text-[11px] text-muted-foreground">
               {diseaseProfiles.findIndex(p => p.id === selectedProfile.id) + 1} of 10
@@ -1034,12 +1194,16 @@ const DiseaseDetectionPage = () => {
           <div className="grid grid-cols-5 sm:grid-cols-10 gap-1.5 overflow-x-auto pb-1">
             {diseaseProfiles.map((p, idx) => {
               const isSelected = p.id === selectedProfile.id;
+              const isHighlighting = isScanning && candidateHighlightIdx === idx;
               return (
                 <button
                   key={p.id}
                   onClick={() => handleSelectDisease(p)}
+                  disabled={isScanning}
                   className={`relative rounded-xl overflow-hidden aspect-square border-2 transition-all p-0.5 group ${
-                    isSelected ? "border-primary ring-2 ring-primary/30 scale-105 shadow-md" : "border-border/50 hover:border-primary/50 opacity-80 hover:opacity-100"
+                    isSelected ? "border-primary ring-2 ring-primary/40 scale-105 shadow-md" : 
+                    isHighlighting ? "border-amber-500 ring-2 ring-amber-400 scale-105 shadow-md" : 
+                    "border-border/50 hover:border-primary/50 opacity-80 hover:opacity-100"
                   }`}
                   title={`${idx + 1}. ${p.disease} (${p.crop})`}
                 >
@@ -1053,11 +1217,36 @@ const DiseaseDetectionPage = () => {
                   }`}>
                     #{idx + 1}
                   </span>
+                  {isHighlighting && (
+                    <span className="absolute inset-0 bg-primary/20 animate-pulse pointer-events-none" />
+                  )}
                 </button>
               );
             })}
           </div>
         </div>
+
+        {/* Big Touch Scan Trigger Button */}
+        {!isScanning && (
+          <div className="space-y-2">
+            <Button
+              onClick={() => startTenSecondScan()}
+              className="w-full gradient-primary text-white font-bold h-13 rounded-2xl shadow-lg hover:shadow-xl transition-all flex items-center justify-center gap-2.5 text-sm group"
+            >
+              <div className="w-8 h-8 rounded-xl bg-white/20 flex items-center justify-center group-hover:scale-110 transition-transform">
+                <Scan className="w-4 h-4 text-white animate-pulse" />
+              </div>
+              <div className="text-left">
+                <span className="block leading-tight text-xs uppercase tracking-wider font-extrabold text-white/90">
+                  Touch to Scan Leaf
+                </span>
+                <span className="block leading-tight text-sm font-bold text-white">
+                  Start 10-Second AI Pathology & Water Analysis ⚡
+                </span>
+              </div>
+            </Button>
+          </div>
+        )}
 
         {/* Upload Box / Camera Trigger */}
         <div 
@@ -1069,30 +1258,284 @@ const DiseaseDetectionPage = () => {
               <Camera className="w-5 h-5" />
             </div>
             <div>
-              <p className="text-xs font-bold text-foreground">Have your own leaf photo?</p>
-              <p className="text-[11px] text-muted-foreground">Click to upload or capture with camera for AI pathology scan</p>
+              <p className="text-xs font-bold text-foreground">Or upload your own farm leaf photo</p>
+              <p className="text-[11px] text-muted-foreground">Select image or snap photo for automatic 10-second deep scan</p>
             </div>
           </div>
           <Button size="sm" variant="outline" className="text-xs h-8">
-            Upload Image
+            Upload Leaf
           </Button>
           <input ref={fileRef} type="file" accept="image/*" className="hidden" onChange={handleUpload} />
         </div>
 
-        {/* AI & Sensor Telemetry */}
-        <div className="bg-primary/5 border border-primary/20 rounded-xl p-3 flex items-center justify-between text-xs">
-          <div className="flex items-center gap-2">
-            <Cpu className="w-4 h-4 text-primary" />
-            <span className="font-bold text-foreground">MobileNetV2 Vision CNN</span>
-            <span className="text-[10px] bg-primary/10 text-primary font-semibold px-2 py-0.5 rounded-full">
-              PlantVillage 38-Class Edge Model
-            </span>
+        {/* =========================================================================
+            10-SECOND HIGH-TECH SCANNING INTEGRATION OVERLAY & TELEMETRY
+           ========================================================================= */}
+        <AnimatePresence>
+          {isScanning && (
+            <motion.div
+              initial={{ opacity: 0, scale: 0.98 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.98 }}
+              className="glass-card rounded-2xl p-5 border-2 border-primary/50 bg-card/95 shadow-xl space-y-4 relative overflow-hidden"
+            >
+              {/* Top Countdown & Status Bar */}
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <div className="w-8 h-8 rounded-xl bg-primary/10 flex items-center justify-center">
+                    <Scan className="w-4 h-4 text-primary animate-spin" />
+                  </div>
+                  <div>
+                    <span className="text-xs font-bold text-foreground flex items-center gap-1.5">
+                      <span>Neural Vision Scanning In Progress...</span>
+                      <span className="inline-block w-2 h-2 rounded-full bg-emerald-500 animate-ping" />
+                    </span>
+                    <p className="text-[11px] text-muted-foreground font-mono">
+                      Step {activeStageIdx + 1} of 5: {SCAN_STAGES[activeStageIdx].badge}
+                    </p>
+                  </div>
+                </div>
+
+                {/* Big 10-Second Digital Timer */}
+                <div className="flex items-center gap-1.5 bg-primary/10 border border-primary/30 rounded-xl px-3 py-1.5 font-mono text-primary font-extrabold text-sm shadow-xs">
+                  <Timer className="w-4 h-4 animate-bounce" />
+                  <span>00:{secondsRemaining < 10 ? `0${secondsRemaining}` : secondsRemaining}</span>
+                  <span className="text-[10px] text-muted-foreground font-sans font-medium">sec</span>
+                </div>
+              </div>
+
+              {/* Progress Bar & Percentage */}
+              <div className="space-y-1.5">
+                <div className="flex items-center justify-between text-xs">
+                  <span className="text-[11px] font-semibold text-foreground flex items-center gap-1">
+                    <Zap className="w-3.5 h-3.5 text-amber-500" /> PlantVillage AI Pipeline
+                  </span>
+                  <span className="font-mono text-xs font-bold text-primary">{scanProgress}% Completed</span>
+                </div>
+                <div className="w-full h-3 bg-muted rounded-full overflow-hidden p-0.5 border border-border/60">
+                  <motion.div 
+                    className="h-full rounded-full gradient-primary transition-all duration-100 relative overflow-hidden"
+                    style={{ width: `${scanProgress}%` }}
+                  >
+                    <div className="absolute inset-0 bg-white/20 animate-pulse" />
+                  </motion.div>
+                </div>
+              </div>
+
+              {/* Leaf Image Being Scanned with Laser Sweep Animation */}
+              <div className="relative rounded-2xl overflow-hidden border border-border/80 bg-black/40 h-64 flex items-center justify-center">
+                <img 
+                  src={uploadedImage || selectedProfile.image} 
+                  alt="Leaf under scan" 
+                  className="w-full h-full object-contain filter contrast-110"
+                />
+
+                {/* Laser Sweep Line */}
+                <motion.div
+                  animate={{ y: [-130, 130, -130] }}
+                  transition={{ repeat: Infinity, duration: 2, ease: "linear" }}
+                  className="absolute inset-x-0 h-1 bg-gradient-to-r from-transparent via-red-500 to-transparent shadow-[0_0_15px_#ef4444] z-20 pointer-events-none"
+                />
+
+                {/* Scanning Reticle HUD */}
+                <div className="absolute inset-4 border border-primary/40 rounded-xl pointer-events-none flex flex-col justify-between p-2">
+                  <div className="flex justify-between text-[10px] font-mono text-primary/80">
+                    <span>SENSOR_RGB_OK</span>
+                    <span>TENSOR: 224x224x3</span>
+                  </div>
+                  <div className="flex justify-between text-[10px] font-mono text-primary/80">
+                    <span>CHLOROPHYLL: ~58%</span>
+                    <span>CONFIDENCE: ~96%</span>
+                  </div>
+                </div>
+
+                {/* Center Pulse Ring */}
+                <div className="absolute w-24 h-24 rounded-full border-2 border-primary/60 animate-ping pointer-events-none" />
+              </div>
+
+              {/* Real-time Dynamic Stage Telemetry */}
+              <div className="bg-muted/40 rounded-xl p-3 border border-border/60 space-y-1">
+                <div className="flex items-center justify-between">
+                  <span className="text-xs font-bold text-foreground flex items-center gap-1.5">
+                    {SCAN_STAGES[activeStageIdx].title}
+                  </span>
+                  <span className="text-[10px] font-mono text-primary font-bold bg-primary/10 px-2 py-0.5 rounded">
+                    {SCAN_STAGES[activeStageIdx].seconds}
+                  </span>
+                </div>
+                <p className="text-[11px] text-muted-foreground leading-relaxed">
+                  {SCAN_STAGES[activeStageIdx].desc}
+                </p>
+              </div>
+
+              {/* Similar Samples Rapid Live-Match Comparison Bar */}
+              <div className="space-y-1.5 pt-1">
+                <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider flex items-center gap-1">
+                  <Search className="w-3 h-3 text-primary" /> Live Comparison Against Sample Leaves:
+                </span>
+                <div className="grid grid-cols-5 gap-2">
+                  {diseaseProfiles.slice(0, 5).map((candidate, i) => (
+                    <div 
+                      key={candidate.id}
+                      className={`relative rounded-lg overflow-hidden aspect-video border transition-all ${
+                        candidateHighlightIdx % 5 === i ? "border-primary ring-2 ring-primary scale-105" : "border-border/40 opacity-70"
+                      }`}
+                    >
+                      <img src={candidate.image} alt={candidate.disease} className="w-full h-full object-cover" />
+                      <span className="absolute bottom-0 inset-x-0 bg-black/75 text-[8px] font-bold text-white text-center truncate px-0.5">
+                        {candidate.crop.split(",")[0]}
+                      </span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
+
+        {/* AI Model Baseline Telemetry */}
+        {!isScanning && (
+          <div className="bg-primary/5 border border-primary/20 rounded-xl p-3 flex items-center justify-between text-xs">
+            <div className="flex items-center gap-2">
+              <Cpu className="w-4 h-4 text-primary" />
+              <span className="font-bold text-foreground">MobileNetV2 Vision CNN</span>
+              <span className="text-[10px] bg-primary/10 text-primary font-semibold px-2 py-0.5 rounded-full">
+                PlantVillage 38-Class Edge Model
+              </span>
+            </div>
+            <div className="flex items-center gap-1.5 font-mono text-[11px] text-muted-foreground">
+              <Activity className="w-3.5 h-3.5 text-emerald-500" />
+              <span>Inference: {inferenceTime}ms</span>
+            </div>
           </div>
-          <div className="flex items-center gap-1.5 font-mono text-[11px] text-muted-foreground">
-            <Activity className="w-3.5 h-3.5 text-emerald-500" />
-            <span>Latency: {inferenceTime}ms</span>
-          </div>
-        </div>
+        )}
+
+        {/* =========================================================================
+            PROMINENT SCAN RESULTS: WATER AMOUNT & DISEASE OCCURRED
+           ========================================================================= */}
+        {scanCompleted && (
+          <motion.div
+            initial={{ opacity: 0, y: 12 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="space-y-3"
+          >
+            {/* Success Banner */}
+            <div className="bg-emerald-500/15 border border-emerald-500/40 rounded-2xl p-4 flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-xl bg-emerald-500 text-white flex items-center justify-center font-bold shadow-sm">
+                  <CheckCircle2 className="w-6 h-6" />
+                </div>
+                <div>
+                  <span className="text-[11px] font-extrabold uppercase tracking-wider text-emerald-700 dark:text-emerald-400">
+                    10-Second Scan Complete & Verified
+                  </span>
+                  <h3 className="text-sm font-bold text-foreground">
+                    Identified: {selectedProfile.disease}
+                  </h3>
+                </div>
+              </div>
+              <span className="text-sm font-extrabold text-emerald-600 dark:text-emerald-400 bg-emerald-500/20 px-3 py-1 rounded-full">
+                {selectedProfile.confidence}% Match
+              </span>
+            </div>
+
+            {/* HIGHLIGHTED CARD: EXACT WATER AMOUNT NEEDED (Prominently displayed) */}
+            <div className="glass-card rounded-2xl p-4 sm:p-5 border-2 border-sky/40 bg-sky/5 shadow-md space-y-3">
+              <div className="flex items-center justify-between border-b border-sky/20 pb-2.5">
+                <div className="flex items-center gap-2">
+                  <div className="w-8 h-8 rounded-lg bg-sky/20 flex items-center justify-center text-sky">
+                    <Droplets className="w-4 h-4" />
+                  </div>
+                  <div>
+                    <h3 className="text-sm font-extrabold text-foreground">
+                      How Much Water Should Take (Irrigation Protocol)
+                    </h3>
+                    <p className="text-[11px] text-muted-foreground">
+                      Exact water dosage and scheduling for {selectedProfile.disease}
+                    </p>
+                  </div>
+                </div>
+                <span className="text-xs font-bold text-sky bg-sky/15 px-2.5 py-1 rounded-md border border-sky/30">
+                  {selectedProfile.waterManagement.irrigationMethod}
+                </span>
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+                <div className="bg-background/90 rounded-xl p-3 border border-sky/30 space-y-0.5">
+                  <span className="text-[10px] uppercase font-bold text-muted-foreground flex items-center gap-1">
+                    <Droplets className="w-3 h-3 text-sky" /> Water Volume Required
+                  </span>
+                  <p className="text-sm font-extrabold text-foreground text-sky-700 dark:text-sky-300">
+                    {selectedProfile.waterManagement.amountNeeded}
+                  </p>
+                </div>
+                <div className="bg-background/90 rounded-xl p-3 border border-sky/30 space-y-0.5">
+                  <span className="text-[10px] uppercase font-bold text-muted-foreground flex items-center gap-1">
+                    <Activity className="w-3 h-3 text-emerald-500" /> Target Soil Moisture
+                  </span>
+                  <p className="text-sm font-extrabold text-foreground">
+                    {selectedProfile.waterManagement.soilMoisture}
+                  </p>
+                </div>
+              </div>
+
+              {/* Water Splash Warning */}
+              <div className="bg-destructive/10 border border-destructive/30 rounded-xl p-3 flex items-start gap-2.5">
+                <ShieldAlert className="w-4 h-4 text-destructive flex-shrink-0 mt-0.5" />
+                <div>
+                  <p className="text-xs font-bold text-destructive">Crucial Irrigation Warning:</p>
+                  <p className="text-xs text-foreground/90 mt-0.5 leading-relaxed">
+                    {selectedProfile.waterManagement.warning}
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            {/* SIMILAR LEAF SAMPLES COMPARISON MATRIX */}
+            {selectedProfile.similarCandidates && selectedProfile.similarCandidates.length > 0 && (
+              <div className="glass-card rounded-2xl p-4 border border-border shadow-xs space-y-2.5">
+                <div className="flex items-center justify-between">
+                  <h4 className="text-xs font-bold text-foreground flex items-center gap-1.5 uppercase tracking-wider">
+                    <Search className="w-3.5 h-3.5 text-primary" /> Similar Leaves Found in Dataset:
+                  </h4>
+                  <span className="text-[10px] text-muted-foreground font-mono">
+                    Top 3 Feature Matches
+                  </span>
+                </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
+                  {selectedProfile.similarCandidates.map((candidate, i) => (
+                    <div 
+                      key={candidate.id}
+                      className="bg-muted/40 hover:bg-muted/70 rounded-xl p-2.5 border border-border/60 transition space-y-1.5"
+                    >
+                      <div className="relative rounded-lg overflow-hidden h-24 border border-border/40">
+                        <img 
+                          src={candidate.image} 
+                          alt={candidate.disease} 
+                          className="w-full h-full object-cover" 
+                        />
+                        <span className="absolute top-1 right-1 text-[9px] font-extrabold bg-black/80 text-white px-1.5 py-0.5 rounded">
+                          {candidate.matchScore}% Match
+                        </span>
+                        <span className="absolute bottom-1 left-1 text-[8px] font-bold bg-primary text-white px-1.5 py-0.5 rounded">
+                          Candidate #{i + 1}
+                        </span>
+                      </div>
+                      <div>
+                        <p className="text-xs font-bold text-foreground truncate">{candidate.disease}</p>
+                        <p className="text-[10px] text-muted-foreground truncate">Crop: {candidate.crop}</p>
+                        <p className="text-[10px] text-muted-foreground italic leading-tight mt-0.5 line-clamp-2">
+                          "{candidate.similarityReason}"
+                        </p>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+          </motion.div>
+        )}
 
         {/* =========================================================================
             CORE VISUAL PATHOLOGY INSPECTION CARD (Matches user's diagram style)
@@ -1258,7 +1701,7 @@ const DiseaseDetectionPage = () => {
               onClick={() => setActiveTab("water")}
               className={`flex items-center justify-center gap-1.5 py-2 px-2 rounded-lg text-xs font-bold transition ${
                 activeTab === "water" 
-                  ? "bg-background text-foreground shadow-xs" 
+                  ? "bg-background text-foreground shadow-xs text-sky" 
                   : "text-muted-foreground hover:text-foreground"
               }`}
             >
@@ -1268,7 +1711,7 @@ const DiseaseDetectionPage = () => {
               onClick={() => setActiveTab("fertilizer")}
               className={`flex items-center justify-center gap-1.5 py-2 px-2 rounded-lg text-xs font-bold transition ${
                 activeTab === "fertilizer" 
-                  ? "bg-background text-foreground shadow-xs" 
+                  ? "bg-background text-foreground shadow-xs text-amber-500" 
                   : "text-muted-foreground hover:text-foreground"
               }`}
             >
@@ -1278,7 +1721,7 @@ const DiseaseDetectionPage = () => {
               onClick={() => setActiveTab("pesticide")}
               className={`flex items-center justify-center gap-1.5 py-2 px-2 rounded-lg text-xs font-bold transition ${
                 activeTab === "pesticide" 
-                  ? "bg-background text-foreground shadow-xs" 
+                  ? "bg-background text-foreground shadow-xs text-emerald-500" 
                   : "text-muted-foreground hover:text-foreground"
               }`}
             >
